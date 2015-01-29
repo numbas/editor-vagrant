@@ -1,6 +1,4 @@
-# coding=utf-8
-
-# Django settings for numbas project.
+# coding: utf-8
 import imp
 import os
 import sys
@@ -117,8 +115,8 @@ INSTALLED_APPS = (
     'editor',
     'registration',
     'django_tables2',
-    'south', # for database migration
     'taggit',
+	'reversion',
 )
 
 SOUTH_MIGRATION_MODULES = {
