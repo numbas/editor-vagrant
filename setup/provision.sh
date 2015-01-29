@@ -2,7 +2,7 @@
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -q -y apache2 git-core libapache2-mod-wsgi mysql-server mysql-common python3 python-imaging acl
+apt-get install -q -y apache2 git-core libapache2-mod-wsgi postgresql postgresql-contrib python3 python-imaging acl
 
 a2enmod wsgi
 
@@ -10,10 +10,14 @@ usermod vagrant -a -G www-data
 
 apt-get install -y  python-pip 
 
-apt-get install -y libmysqlclient-dev python-dev
+apt-get install -y libpq-dev python-dev
 
-mysql -u root -e "create database numbas_editor;"
-mysql -u root -e "grant all privileges on numbas_editor.* to 'numbas'@'localhost';"
+sudo cp /vagrant/setup/pg_hba.conf /etc/postgresql/9.1/main/pg_hba.conf
+sudo service postgresql restart
+
+sudo -u postgres createdb numbas_editor
+sudo -u postgres psql -c "create user numbas;"
+sudo -u postgres psql -c "grant all privileges on database numbas_editor to numbas;"
 
 mkdir /srv/numbas
 mkdir /srv/numbas/media
@@ -37,13 +41,10 @@ cp /vagrant/setup/django.wsgi /srv/www/numbas_editor/web/django.wsgi
 cp /vagrant/setup/index.html /srv/www/numbas_editor/editor/templates/index.html
 
 pip install -r /srv/www/numbas_editor/numbas/requirements.pip
-pip install MySQL-python
+pip install psycopg2
 
 cd /srv/www/numbas_editor
 python manage.py syncdb --noinput
-python manage.py migrate taggit
-python manage.py migrate editor
-python manage.py migrate accounts
 python manage.py collectstatic --noinput
 
 cp editor/templates/index.html.dist editor/templates/index.html
